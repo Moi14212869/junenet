@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Nouvel onglet – JuneNet</title>
+<link rel="icon" href="junenet.ico">
+
+<style>
+body {
+    background-color: #1e1e2f;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+    position: relative;
+}
+
+.logo-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.logo-title img {
+    width: 64px;
+    height: 64px;
+}
+
+h1 {
+    color: #a78bfa;
+    font-size: 64px;
+    margin: 0;
+}
+
+input {
+    width: 420px;
+    padding: 15px;
+    font-size: 18px;
+    border-radius: 30px;
+    border: none;
+    outline: none;
+}
+
+input:focus {
+    box-shadow: 0 0 10px #a78bfa;
+}
+
+/* Suggestions */
+#suggestions {
+    position: absolute;
+    top: 170px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 420px;
+    background: #2a2a3d;
+    border-radius: 12px;
+    overflow: hidden;
+    display: none;
+    z-index: 10;
+}
+
+.suggestion {
+    padding: 12px 20px;
+    text-align: left;
+    color: white;
+    cursor: pointer;
+}
+
+.suggestion:hover {
+    background: #3a3a55;
+}
+
+.suggestion strong {
+    font-weight: bold;
+    color: #a78bfa;
+}
+
+/* Liens rapides */
+.quick-links {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.quick-links a {
+    text-decoration: none;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 14px;
+    width: 90px;
+    transition: transform 0.2s ease;
+}
+
+.quick-links a:hover {
+    transform: scale(1.1);
+}
+
+.quick-links img {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+    background: #2a2a3d;
+    padding: 6px;
+}
+</style>
+
+<script>
+function escapeRegExp(str) {
+    return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+}
+
+function highlightMatch(text, query) {
+    if (!query) return text;
+    const regex = new RegExp("(" + escapeRegExp(query) + ")", "ig");
+    return text.replace(regex, "<strong>$1</strong>");
+}
+
+function suggestCallback(data) {
+    if (!data || !data[1]) return;
+    showSuggestions(data[1]);
+}
+
+function fetchSuggestions(q) {
+    const old = document.getElementById("jsonp");
+    if (old) old.remove();
+
+    const script = document.createElement("script");
+    script.id = "jsonp";
+    script.src =
+        "https://suggestqueries.google.com/complete/search" +
+        "?client=firefox&q=" + encodeURIComponent(q) +
+        "&callback=suggestCallback";
+    document.body.appendChild(script);
+}
+
+function showSuggestions(list) {
+    const box = document.getElementById("suggestions");
+    const q = document.getElementById("q").value.trim();
+    box.innerHTML = "";
+
+    list.slice(0, 6).forEach(text => {
+        const div = document.createElement("div");
+        div.className = "suggestion";
+        div.innerHTML = highlightMatch(text, q);
+        div.onclick = () => search(text);
+        box.appendChild(div);
+    });
+
+    box.style.display = "block";
+}
+
+function hideSuggestions() {
+    document.getElementById("suggestions").style.display = "none";
+}
+
+function search(value = null) {
+    const q = value || document.getElementById("q").value.trim();
+    if (!q) return;
+    hideSuggestions();
+    window.location.href =
+        "https://www.google.com/search?q=" + encodeURIComponent(q);
+}
+
+function onInput(e) {
+    const q = e.value.trim();
+    if (!q) {
+        hideSuggestions();
+        return;
+    }
+    fetchSuggestions(q);
+}
+
+function onKey(e) {
+    if (e.key === "Enter") search();
+}
+</script>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="logo-title">
+        <img src="junenet.png" alt="JuneNet">
+        <h1>JuneNet</h1>
+    </div>
+
+    <input id="q"
+           type="text"
+           placeholder="Rechercher sur Google"
+           autofocus
+           oninput="onInput(this)"
+           onkeydown="onKey(event)">
+
+    <div id="suggestions"></div>
+
+    <div class="quick-links">
+        <a href="https://mail.google.com" target="_self">
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=google.com">
+            <span>Gmail</span>
+        </a>
+
+        <a href="https://chat.openai.com" target="_self">
+            <img src="https://chat.openai.com/favicon.ico">
+            <span>ChatGPT</span>
+        </a>
+
+        <a href="https://www.youtube.com" target="_self">
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com">
+            <span>YouTube</span>
+        </a>
+
+        <a href="https://github.com" target="_self">
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=github.com">
+            <span>GitHub</span>
+        </a>
+
+        <a href="https://moi14212869.github.io/onelevel/" target="_self">
+            <img src="https://moi14212869.github.io/onelevel/favicon.ico">
+            <span>OneLevel</span>
+        </a>
+
+        <a href="https://anawan.io" target="_self">
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=anawan.io">
+            <span>Anawan</span>
+        </a>
+    </div>
+
+</div>
+</body>
+</html>
