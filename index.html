@@ -220,10 +220,6 @@ input:focus {
     transform: scale(1.1);
 }
 
-.quick-links a:hover .remove-link {
-    display: flex;
-}
-
 .quick-links img {
     width: 48px;
     height: 48px;
@@ -233,38 +229,9 @@ input:focus {
     padding: 6px;
 }
 
-.remove-link {
-    display: none;
-    position: absolute;
-    top: -6px;
-    right: 6px;
-    width: 18px;
-    height: 18px;
-    background: #ff5c5c;
-    color: white;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.add-link {
-    background: #2a2a3d;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: #a78bfa;
-    margin-bottom: 6px;
-}
-
-.quick-links a.add-link-wrapper:hover .add-link {
-    background: #3a3a55;
+.quick-links .visits {
+    font-size: 11px;
+    color: #9a94c2;
 }
 
 /* Thème clair */
@@ -303,8 +270,7 @@ body.light .quick-links a {
     color: #2a2140;
 }
 
-body.light .quick-links img,
-body.light .add-link {
+body.light .quick-links img {
     background: #ffffff;
 }
 
@@ -371,12 +337,20 @@ const ENGINES = {
         label: "Wikipédia",
         url: "https://fr.wikipedia.org/w/index.php?search=",
         icon: "https://www.google.com/s2/favicons?sz=64&domain=wikipedia.org"
+    },
+    ecosia: {
+        label: "Ecosia",
+        url: "https://www.ecosia.org/search?q=",
+        icon: "https://www.google.com/s2/favicons?sz=64&domain=ecosia.org"
     }
 };
 
+const ENGINE_STORAGE_KEY = "junenet_search_engine";
 let currentEngine = "google";
 
-function setEngine(name) {
+function setEngine(name, persist = true) {
+    if (!ENGINES[name]) return;
+
     currentEngine = name;
     document.getElementById("engine-icon").src = ENGINES[name].icon;
     document.getElementById("q").placeholder = "Rechercher sur " + ENGINES[name].label;
@@ -385,7 +359,26 @@ function setEngine(name) {
         opt.classList.toggle("selected", opt.dataset.engine === name);
     });
 
+    if (persist) {
+        try {
+            localStorage.setItem(ENGINE_STORAGE_KEY, name);
+        } catch (e) {
+            // localStorage indisponible (ex: aperçu Claude.ai) : on continue
+            // simplement sans sauvegarde persistante.
+        }
+    }
+
     closeEngineMenu();
+}
+
+function loadSavedEngine() {
+    let saved = null;
+    try {
+        saved = localStorage.getItem(ENGINE_STORAGE_KEY);
+    } catch (e) {
+        saved = null;
+    }
+    setEngine(saved && ENGINES[saved] ? saved : "google", false);
 }
 
 function toggleEngineMenu(event) {
@@ -522,59 +515,62 @@ function toggleTheme() {
     btn.textContent = document.body.classList.contains("light") ? "🌙 Sombre" : "☀️ Clair";
 }
 
-/* ---------- Liens rapides personnalisés ----------
-   Remarque : stockés en mémoire pour la durée de la session
-   (pas de localStorage ici). Une fois déployée sur ton site,
-   tu peux remplacer customLinks par une lecture/écriture
-   localStorage pour les rendre persistants d'une session à l'autre. */
-let customLinks = [];
-
-function addCustomLink() {
-    const name = prompt("Nom du lien :");
-    if (!name) return;
-    let url = prompt("URL du site (ex: https://exemple.com) :");
-    if (!url) return;
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        url = "https://" + url;
-    }
-
-    customLinks.push({ name, url });
-    renderCustomLinks();
-}
-
-function removeCustomLink(index, event) {
-    event.preventDefault();
-    event.stopPropagation();
-    customLinks.splice(index, 1);
-    renderCustomLinks();
-}
-
-function renderCustomLinks() {
-    const container = document.getElementById("custom-links");
+/* ---------- Sites les plus visités ----------
+   Les données proviennent du véritable historique de navigation de
+   JuneNet, via un pont QWebChannel exposé par l'application Python
+   (voir la classe Bridge dans JuneNet.py). */
+function renderTopSites(sites) {
+    const container = document.getElementById("top-sites");
     container.innerHTML = "";
 
-    customLinks.forEach((link, i) => {
-        let domain = link.url;
-        try { domain = new URL(link.url).hostname; } catch (e) {}
+    if (!sites || !sites.length) {
+        return;
+    }
 
+    sites.forEach(site => {
         const a = document.createElement("a");
-        a.href = link.url;
+        a.href = site.url;
         a.target = "_self";
+        a.title = site.url;
         a.innerHTML = `
-            <span class="remove-link" onclick="removeCustomLink(${i}, event)">✕</span>
-            <img src="https://www.google.com/s2/favicons?sz=64&domain=${domain}">
-            <span>${link.name}</span>
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=${site.domain}">
+            <span>${site.title}</span>
+            <span class="visits">${site.visits} visite${site.visits > 1 ? "s" : ""}</span>
         `;
         container.appendChild(a);
+    });
+}
+
+function loadTopSites() {
+    if (!window.junenetBridge) return;
+    window.junenetBridge.topSites(function (result) {
+        try {
+            renderTopSites(JSON.parse(result));
+        } catch (e) {
+            console.error("Impossible de lire les sites les plus visités :", e);
+        }
+    });
+}
+
+function initBridge() {
+    if (typeof qt === "undefined" || !qt.webChannelTransport) {
+        // Page ouverte hors de JuneNet (navigateur classique) : pas de pont disponible.
+        return;
+    }
+    new QWebChannel(qt.webChannelTransport, function (channel) {
+        window.junenetBridge = channel.objects.bridge;
+        loadTopSites();
     });
 }
 
 window.addEventListener("load", () => {
     updateClock();
     setInterval(updateClock, 30000);
-    setEngine("google");
+    loadSavedEngine();
+    initBridge();
 });
 </script>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 </head>
 
 <body>
@@ -611,6 +607,9 @@ window.addEventListener("load", () => {
                 <div class="engine-option" data-engine="wikipedia" onclick="setEngine('wikipedia')">
                     <img src="https://www.google.com/s2/favicons?sz=64&domain=wikipedia.org"> Wikipédia
                 </div>
+                <div class="engine-option" data-engine="ecosia" onclick="setEngine('ecosia')">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=ecosia.org"> Ecosia
+                </div>
             </div>
         </div>
 
@@ -625,26 +624,6 @@ window.addEventListener("load", () => {
     <div id="suggestions"></div>
 
     <div class="quick-links">
-        <a href="https://mail.google.com" target="_self">
-            <img src="https://www.google.com/s2/favicons?sz=64&domain=google.com">
-            <span>Gmail</span>
-        </a>
-
-        <a href="https://chat.openai.com" target="_self">
-            <img src="https://chat.openai.com/favicon.ico">
-            <span>ChatGPT</span>
-        </a>
-
-        <a href="https://www.youtube.com" target="_self">
-            <img src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com">
-            <span>YouTube</span>
-        </a>
-
-        <a href="https://github.com" target="_self">
-            <img src="https://www.google.com/s2/favicons?sz=64&domain=github.com">
-            <span>GitHub</span>
-        </a>
-
         <a href="https://moi14212869.github.io/onelevel/" target="_self">
             <img src="https://moi14212869.github.io/onelevel/favicon.ico">
             <span>OneLevel</span>
@@ -660,12 +639,7 @@ window.addEventListener("load", () => {
             <span>Fenyx Esport</span>
         </a>
 
-        <span id="custom-links" style="display:contents"></span>
-
-        <a href="#" class="add-link-wrapper" onclick="addCustomLink(); return false;">
-            <div class="add-link">+</div>
-            <span>Ajouter</span>
-        </a>
+        <span id="top-sites" style="display:contents"></span>
     </div>
 
 </div>
