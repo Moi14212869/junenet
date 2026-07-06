@@ -14,11 +14,34 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+    color: white;
 }
 
 .container {
     text-align: center;
     position: relative;
+}
+
+.clock {
+    position: absolute;
+    top: -90px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.clock #time {
+    font-size: 42px;
+    font-weight: bold;
+    color: #e5e0ff;
+    letter-spacing: 2px;
+}
+
+.clock #date {
+    font-size: 14px;
+    color: #9a94c2;
+    text-transform: capitalize;
+    margin-top: 4px;
 }
 
 .logo-title {
@@ -50,7 +73,95 @@ input {
 }
 
 input:focus {
+    box-shadow: none;
+}
+
+/* Barre de recherche + sélecteur de moteur */
+.search-bar {
+    display: flex;
+    align-items: center;
+    width: 420px;
+    background: white;
+    border-radius: 30px;
+    padding: 6px 6px 6px 6px;
+    margin: 0 auto;
+}
+
+.search-bar:focus-within {
     box-shadow: 0 0 10px #a78bfa;
+}
+
+.search-bar input {
+    width: auto;
+    flex: 1;
+    box-shadow: none !important;
+}
+
+.engine-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.engine-selector:hover {
+    background: #eee7fb;
+}
+
+.engine-selector img {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
+
+.engine-selector .arrow {
+    font-size: 10px;
+    color: #8a7cc9;
+}
+
+.engine-menu {
+    position: absolute;
+    top: 42px;
+    left: 0;
+    background: #2a2a3d;
+    border-radius: 10px;
+    overflow: hidden;
+    display: none;
+    z-index: 20;
+    min-width: 160px;
+}
+
+.engine-menu.open {
+    display: block;
+}
+
+.engine-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    color: white;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.engine-option:hover {
+    background: #3a3a55;
+}
+
+.engine-option.selected {
+    background: #3a3a55;
+    font-weight: bold;
+}
+
+.engine-option img {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
 }
 
 /* Suggestions */
@@ -74,7 +185,8 @@ input:focus {
     cursor: pointer;
 }
 
-.suggestion:hover {
+.suggestion:hover,
+.suggestion.selected {
     background: #3a3a55;
 }
 
@@ -85,7 +197,7 @@ input:focus {
 
 /* Liens rapides */
 .quick-links {
-    margin-top: 30px;
+    margin-top: 40px;
     display: flex;
     justify-content: center;
     gap: 25px;
@@ -101,10 +213,15 @@ input:focus {
     font-size: 14px;
     width: 90px;
     transition: transform 0.2s ease;
+    position: relative;
 }
 
 .quick-links a:hover {
     transform: scale(1.1);
+}
+
+.quick-links a:hover .remove-link {
+    display: flex;
 }
 
 .quick-links img {
@@ -115,9 +232,179 @@ input:focus {
     background: #2a2a3d;
     padding: 6px;
 }
+
+.remove-link {
+    display: none;
+    position: absolute;
+    top: -6px;
+    right: 6px;
+    width: 18px;
+    height: 18px;
+    background: #ff5c5c;
+    color: white;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.add-link {
+    background: #2a2a3d;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #a78bfa;
+    margin-bottom: 6px;
+}
+
+.quick-links a.add-link-wrapper:hover .add-link {
+    background: #3a3a55;
+}
+
+/* Thème clair */
+body.light {
+    background-color: #f4f2fb;
+    color: #2a2140;
+}
+
+body.light .clock #time {
+    color: #6d4fc4;
+}
+
+body.light .clock #date {
+    color: #8a7cc9;
+}
+
+body.light input {
+    background: white;
+    color: #2a2140;
+}
+
+body.light #suggestions {
+    background: #ffffff;
+}
+
+body.light .suggestion {
+    color: #2a2140;
+}
+
+body.light .suggestion:hover,
+body.light .suggestion.selected {
+    background: #ece7fb;
+}
+
+body.light .quick-links a {
+    color: #2a2140;
+}
+
+body.light .quick-links img,
+body.light .add-link {
+    background: #ffffff;
+}
+
+body.light .search-bar {
+    background: #ffffff;
+    box-shadow: 0 0 0 1px #e5deff;
+}
+
+body.light .engine-selector:hover {
+    background: #ece7fb;
+}
+
+body.light .engine-menu {
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+body.light .engine-option {
+    color: #2a2140;
+}
+
+body.light .engine-option:hover {
+    background: #ece7fb;
+}
+
+.theme-toggle {
+    position: absolute;
+    top: -90px;
+    right: -260px;
+    background: #2a2a3d;
+    border: none;
+    color: #cfc9f0;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+body.light .theme-toggle {
+    background: #ffffff;
+    color: #6d4fc4;
+}
 </style>
 
 <script>
+/* ---------- Moteur de recherche ---------- */
+const ENGINES = {
+    google: {
+        label: "Google",
+        url: "https://www.google.com/search?q=",
+        icon: "https://www.google.com/s2/favicons?sz=64&domain=google.com"
+    },
+    bing: {
+        label: "Bing",
+        url: "https://www.bing.com/search?q=",
+        icon: "https://www.google.com/s2/favicons?sz=64&domain=bing.com"
+    },
+    duckduckgo: {
+        label: "DuckDuckGo",
+        url: "https://duckduckgo.com/?q=",
+        icon: "https://www.google.com/s2/favicons?sz=64&domain=duckduckgo.com"
+    },
+    wikipedia: {
+        label: "Wikipédia",
+        url: "https://fr.wikipedia.org/w/index.php?search=",
+        icon: "https://www.google.com/s2/favicons?sz=64&domain=wikipedia.org"
+    }
+};
+
+let currentEngine = "google";
+
+function setEngine(name) {
+    currentEngine = name;
+    document.getElementById("engine-icon").src = ENGINES[name].icon;
+    document.getElementById("q").placeholder = "Rechercher sur " + ENGINES[name].label;
+
+    document.querySelectorAll(".engine-option").forEach(opt => {
+        opt.classList.toggle("selected", opt.dataset.engine === name);
+    });
+
+    closeEngineMenu();
+}
+
+function toggleEngineMenu(event) {
+    if (event) event.stopPropagation();
+    document.getElementById("engine-menu").classList.toggle("open");
+}
+
+function closeEngineMenu() {
+    document.getElementById("engine-menu").classList.remove("open");
+}
+
+document.addEventListener("click", (e) => {
+    const selector = document.getElementById("engine-selector");
+    if (selector && !selector.contains(e.target)) {
+        closeEngineMenu();
+    }
+});
+
+/* ---------- Recherche + suggestions ---------- */
 function escapeRegExp(str) {
     return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 }
@@ -146,10 +433,13 @@ function fetchSuggestions(q) {
     document.body.appendChild(script);
 }
 
+let selectedIndex = -1;
+
 function showSuggestions(list) {
     const box = document.getElementById("suggestions");
     const q = document.getElementById("q").value.trim();
     box.innerHTML = "";
+    selectedIndex = -1;
 
     list.slice(0, 6).forEach(text => {
         const div = document.createElement("div");
@@ -159,19 +449,19 @@ function showSuggestions(list) {
         box.appendChild(div);
     });
 
-    box.style.display = "block";
+    box.style.display = list.length ? "block" : "none";
 }
 
 function hideSuggestions() {
     document.getElementById("suggestions").style.display = "none";
+    selectedIndex = -1;
 }
 
 function search(value = null) {
     const q = value || document.getElementById("q").value.trim();
     if (!q) return;
     hideSuggestions();
-    window.location.href =
-        "https://www.google.com/search?q=" + encodeURIComponent(q);
+    window.location.href = ENGINES[currentEngine].url + encodeURIComponent(q);
 }
 
 function onInput(e) {
@@ -183,13 +473,119 @@ function onInput(e) {
     fetchSuggestions(q);
 }
 
+/* Navigation au clavier dans les suggestions */
 function onKey(e) {
-    if (e.key === "Enter") search();
+    const box = document.getElementById("suggestions");
+    const items = box.querySelectorAll(".suggestion");
+
+    if (e.key === "Enter") {
+        if (selectedIndex >= 0 && items[selectedIndex]) {
+            search(items[selectedIndex].textContent);
+        } else {
+            search();
+        }
+        return;
+    }
+
+    if (!items.length || box.style.display === "none") return;
+
+    if (e.key === "ArrowDown") {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % items.length;
+    } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+    } else {
+        return;
+    }
+
+    items.forEach(it => it.classList.remove("selected"));
+    items[selectedIndex].classList.add("selected");
+    document.getElementById("q").value = items[selectedIndex].textContent;
 }
+
+/* ---------- Horloge ---------- */
+function updateClock() {
+    const now = new Date();
+    const time = now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    const date = now.toLocaleDateString("fr-FR", {
+        weekday: "long", day: "numeric", month: "long"
+    });
+    document.getElementById("time").textContent = time;
+    document.getElementById("date").textContent = date;
+}
+
+/* ---------- Thème clair / sombre ---------- */
+function toggleTheme() {
+    document.body.classList.toggle("light");
+    const btn = document.getElementById("theme-toggle");
+    btn.textContent = document.body.classList.contains("light") ? "🌙 Sombre" : "☀️ Clair";
+}
+
+/* ---------- Liens rapides personnalisés ----------
+   Remarque : stockés en mémoire pour la durée de la session
+   (pas de localStorage ici). Une fois déployée sur ton site,
+   tu peux remplacer customLinks par une lecture/écriture
+   localStorage pour les rendre persistants d'une session à l'autre. */
+let customLinks = [];
+
+function addCustomLink() {
+    const name = prompt("Nom du lien :");
+    if (!name) return;
+    let url = prompt("URL du site (ex: https://exemple.com) :");
+    if (!url) return;
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://" + url;
+    }
+
+    customLinks.push({ name, url });
+    renderCustomLinks();
+}
+
+function removeCustomLink(index, event) {
+    event.preventDefault();
+    event.stopPropagation();
+    customLinks.splice(index, 1);
+    renderCustomLinks();
+}
+
+function renderCustomLinks() {
+    const container = document.getElementById("custom-links");
+    container.innerHTML = "";
+
+    customLinks.forEach((link, i) => {
+        let domain = link.url;
+        try { domain = new URL(link.url).hostname; } catch (e) {}
+
+        const a = document.createElement("a");
+        a.href = link.url;
+        a.target = "_self";
+        a.innerHTML = `
+            <span class="remove-link" onclick="removeCustomLink(${i}, event)">✕</span>
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=${domain}">
+            <span>${link.name}</span>
+        `;
+        container.appendChild(a);
+    });
+}
+
+window.addEventListener("load", () => {
+    updateClock();
+    setInterval(updateClock, 30000);
+    setEngine("google");
+});
 </script>
 </head>
 
 <body>
+
+<div class="clock">
+    <div id="time">--:--</div>
+    <div id="date">chargement…</div>
+</div>
+
+<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">☀️ Clair</button>
+
 <div class="container">
 
     <div class="logo-title">
@@ -197,12 +593,34 @@ function onKey(e) {
         <h1>JuneNet</h1>
     </div>
 
-    <input id="q"
-           type="text"
-           placeholder="Rechercher sur Google"
-           autofocus
-           oninput="onInput(this)"
-           onkeydown="onKey(event)">
+    <div class="search-bar">
+        <div class="engine-selector" id="engine-selector" onclick="toggleEngineMenu(event)">
+            <img id="engine-icon" src="https://www.google.com/s2/favicons?sz=64&domain=google.com" alt="moteur">
+            <span class="arrow">▾</span>
+
+            <div class="engine-menu" id="engine-menu">
+                <div class="engine-option selected" data-engine="google" onclick="setEngine('google')">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=google.com"> Google
+                </div>
+                <div class="engine-option" data-engine="bing" onclick="setEngine('bing')">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=bing.com"> Bing
+                </div>
+                <div class="engine-option" data-engine="duckduckgo" onclick="setEngine('duckduckgo')">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=duckduckgo.com"> DuckDuckGo
+                </div>
+                <div class="engine-option" data-engine="wikipedia" onclick="setEngine('wikipedia')">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=wikipedia.org"> Wikipédia
+                </div>
+            </div>
+        </div>
+
+        <input id="q"
+               type="text"
+               placeholder="Rechercher sur Google"
+               autofocus
+               oninput="onInput(this)"
+               onkeydown="onKey(event)">
+    </div>
 
     <div id="suggestions"></div>
 
@@ -241,7 +659,13 @@ function onKey(e) {
             <img src="https://moi14212869.github.io/Fenyx/logo2.png">
             <span>Fenyx Esport</span>
         </a>
-        
+
+        <span id="custom-links" style="display:contents"></span>
+
+        <a href="#" class="add-link-wrapper" onclick="addCustomLink(); return false;">
+            <div class="add-link">+</div>
+            <span>Ajouter</span>
+        </a>
     </div>
 
 </div>
